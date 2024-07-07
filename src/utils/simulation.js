@@ -1,5 +1,3 @@
-import { gaussian } from "gaussian";
-
 export const simulateChromatogram = (params) => {
   const {
     columnLength,
@@ -21,15 +19,19 @@ export const simulateChromatogram = (params) => {
   ];
 
   const chromatogram = peaks.map((peak) => {
-    const distribution = gaussian(peak.retentionTime, peak.width);
     const data = Array.from({ length: 100 }, (_, i) => {
       const time = i * 0.1;
-      return { time, intensity: distribution.pdf(time) * peak.area };
+      return { time, intensity: gaussian(time, peak.retentionTime, peak.width) * peak.area };
     });
     return data;
   });
 
   return chromatogram.flat();
+};
+
+const gaussian = (x, mean, stdDev) => {
+  const exponent = -((x - mean) ** 2) / (2 * stdDev ** 2);
+  return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
 };
 
 export const calculateChromatographicParameters = (chromatogram) => {
