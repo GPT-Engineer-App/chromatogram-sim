@@ -3,8 +3,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Line } from "react-chartjs-2";
+import { simulateChromatogram, calculateChromatographicParameters } from "@/utils/simulation";
 
 const Index = () => {
   const [formData, setFormData] = useState({
@@ -20,6 +21,9 @@ const Index = () => {
     gradientProgram: "",
   });
 
+  const [chromatogram, setChromatogram] = useState([]);
+  const [chromatographicParams, setChromatographicParams] = useState({});
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -31,7 +35,22 @@ const Index = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+    const simulatedChromatogram = simulateChromatogram(formData);
+    setChromatogram(simulatedChromatogram);
+    const params = calculateChromatographicParameters(simulatedChromatogram);
+    setChromatographicParams(params);
+  };
+
+  const chartData = {
+    labels: chromatogram.map((point) => point.time),
+    datasets: [
+      {
+        label: "Chromatogram",
+        data: chromatogram.map((point) => point.intensity),
+        borderColor: "rgba(75,192,192,1)",
+        fill: false,
+      },
+    ],
   };
 
   return (
@@ -159,6 +178,24 @@ const Index = () => {
           </form>
         </CardContent>
       </Card>
+      {chromatogram.length > 0 && (
+        <div className="mt-8">
+          <Card>
+            <CardHeader>
+              <CardTitle>Simulated Chromatogram</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Line data={chartData} />
+              <div className="mt-4">
+                <h3>Chromatographic Parameters</h3>
+                <p>Resolution: {chromatographicParams.resolution}</p>
+                <p>Theoretical Plates: {chromatographicParams.theoreticalPlates}</p>
+                <p>Tailing Factor: {chromatographicParams.tailingFactor}</p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };
