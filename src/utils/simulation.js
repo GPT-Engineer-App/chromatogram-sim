@@ -18,6 +18,11 @@ export const simulateChromatogram = (params) => {
     { retentionTime: 5, width: 0.2, area: 200 },
   ];
 
+  const gaussian = (x, mean, stdDev) => {
+    const exponent = -((x - mean) ** 2) / (2 * stdDev ** 2);
+    return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
+  };
+
   const chromatogram = peaks.map((peak) => {
     const data = Array.from({ length: 100 }, (_, i) => {
       const time = i * 0.1;
@@ -27,11 +32,6 @@ export const simulateChromatogram = (params) => {
   });
 
   return chromatogram.flat();
-};
-
-const gaussian = (x, mean, stdDev) => {
-  const exponent = -((x - mean) ** 2) / (2 * stdDev ** 2);
-  return (1 / (stdDev * Math.sqrt(2 * Math.PI))) * Math.exp(exponent);
 };
 
 export const calculateChromatographicParameters = (chromatogram) => {
